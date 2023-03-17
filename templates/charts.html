@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en" class="normal_page">
+<head>
+	<meta charset="utf-8">
+	<title>Nodes charts | telemetry.ton</title>
+	<link rel="stylesheet" type="text/css" href="/static/style.css">
+	<script src="/static/chart.js"></script>
+	<script src="/static/chartjs-adapter-date-fns.js"></script>
+</head>
+
+<body>
+	{% for chart in charts %}
+	{{chart}}
+	{% endfor %}
+</body>
+
+</html>

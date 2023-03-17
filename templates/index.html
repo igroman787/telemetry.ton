@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en" class="normal_page">
+<head>
+	<meta charset="utf-8">
+	<title>telemetry.ton</title>
+	<link rel="stylesheet" type="text/css" href="/static/style.css">
+</head>
+
+<body>
+	<div style="display: flex">
+		<a href="/nodes" class="green_button">Nodes list</a>
+		<a href="/validators" class="green_button">Validators list</a>
+		<a href="/favorites" class="green_button">Favorites list</a>
+		<a href="/warnings" class="green_button">Warnings list</a>
+	</div>
+	{% if user_key %}
+	<div style="display: flex">
+		<a href="/settings" class="green_button">Settings</a>
+		<form action="/logoute" method="post">
+			<input type="hidden" name="redirect_url" value="{{redirect_url}}">
+			<input type="submit" class="green_button" value="Logoute">
+		</form>
+	</div>
+	{% else %}
+	<form action="/login" method="post" autocomplete="off">
+		<input type="hidden" name="redirect_url" value="{{redirect_url}}">
+		<input name="user_key" type="text" placeholder="User key">
+		<input type="submit" class="green_button" value="Login">
+	</form>
+	{% endif %}
+</body>
+
+</html>

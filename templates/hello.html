@@ -1,0 +1,9 @@
+<!doctype html>
+<title>Hello from Flask</title>
+{% if username %}
+  <h1>Hello {{ username }}!</h1>
+{% else %}
+  <h1>Hello World!</h1>
+{% endif %}
+
+{% include "star_button.html" %}

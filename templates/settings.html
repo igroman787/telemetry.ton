@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en" class="normal_page">
+<head>
+	<meta charset="utf-8">
+	<title>Settings | telemetry.ton</title>
+	<link rel="stylesheet" type="text/css" href="/static/style.css">
+</head>
+
+<body>
+	<form action="/add_settings" method="post" autocomplete="off">
+		<input type="hidden" name="redirect_url" value="{{redirect_url}}">
+		{% include "select.html" %}
+		<p><input type="submit" class="button" value="Apply"></p>
+	</form>
+</body>
+
+</html>

@@ -1,0 +1,19 @@
+<s2>{{ table_name }}</s2>
+<table border=1>
+	<thead>
+		<tr>
+		{% for item in table_lines.pop(0) %}
+			<th>{{ item }}</th>
+		{% endfor %}
+		</tr>
+	</thead>
+	<tbody>
+	{% for line in table_lines %}
+		<tr>
+		{% for item in line %}
+			<td>{{ item }}</td>
+		{% endfor %}
+		</tr>
+	{% endfor %}
+	</tbody>
+</table>

@@ -1,0 +1,9 @@
+<form method="post" action="{{star_button.url}}" style="display: flex;">
+	<input type="hidden" name="redirect_url" value="{{star_button.redirect_url}}">
+	<input type="hidden" name="adnl_address" value="{{star_button.adnl_address}}">
+	{% if star_button.active %}
+	<input type="image" src="/static/active_star_icon.png"  width=15 height=15>
+	{% else %}
+	<input type="image" src="/static/inactive_star_icon.png" width=15 height=15>
+	{% endif %}
+</form>

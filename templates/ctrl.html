@@ -1,0 +1,33 @@
+<dev class="ctrl">
+	<form method="post" action="{{ctrl.star_button.url}}" style="display: flex">
+		<input type="hidden" name="redirect_url" value="{{ctrl.redirect_url}}">
+		<input type="hidden" name="adnl_address" value="{{ctrl.adnl_address}}">
+		{% if ctrl.star_button.active %}
+		<button class="image_button"><img class="button_img" src="/static/active_star_icon.png"/></button>
+		{% else %}
+		<button class="image_button"><img class="button_img" src="/static/inactive_star_icon.png"/></button>
+		{% endif %}
+	</form>
+	
+	<button class="image_button" onclick="notepad_click('{{ctrl.adnl_address}}')"><img class="button_img" src="/static/notepad_icon.png"/></button>
+	<dev id="{{ctrl.adnl_address}}" class="edit_note_block">
+		<form method="post" action="/edit_note">
+			<s2>Note for {{ctrl.short_adnl_address}}</s2>
+			<br>
+			<input type="hidden" name="redirect_url" value="{{ctrl.redirect_url}}">
+			<input type="hidden" name="adnl_address" value="{{ctrl.adnl_address}}">
+			<textarea name="note" cols="40" rows="3">{{ctrl.note}}</textarea>
+			<br>
+			<input type="submit" class="green_button" value="Edit">
+		</form>
+	</dev>
+	
+	<a class="image_button" href="/charts?adnls={{ctrl.adnl_address}}"><img class="button_img" src="/static/charts.png"></a>
+	<a class="image_button" href="/node?adnl={{ctrl.adnl_address}}"><img class="button_img" src="/static/data.png"></a>
+	
+	{% if ctrl.warning and ctrl.warning.critical %}
+	<img class="button_img" src="/static/error.png" title="{{ctrl.warning.text}}"/>
+	{% elif ctrl.warning %}
+	<img class="button_img" src="/static/warning.png" title="{{ctrl.warning.text}}"/>
+	{% endif %}
+</dev>

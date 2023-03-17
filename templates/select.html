@@ -1,0 +1,5 @@
+<select size="{{select.size}}" {% if select.multiple %} multiple {% endif %} name="select_items">
+	{% for item in select.items %}
+	<option value="{{item}}">{{item}}</option>
+	{% endfor %}
+</select>

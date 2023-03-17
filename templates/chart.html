@@ -1,0 +1,32 @@
+<div class="chart">
+	<s2>{{chart.title}}</s2>
+	<canvas id="{{chart.id}}"></canvas>
+</div>
+<script>
+	new Chart(document.getElementById("{{chart.id}}"), {
+		type: "line",
+		data: {
+			datasets: {{chart.datasets|safe}}
+		},
+		options: {
+			animation: false,
+			scales: {
+				y: {
+					beginAtZero: true,
+					{% if chart.max %}
+					max: {{chart.max}}
+					{% endif %}
+				},
+				x: {
+					type: "time",
+					ticks: {
+						maxRotation: 0,
+						major: {
+							enabled: true
+						}
+					}
+				}
+			}
+		}
+	});
+</script>
