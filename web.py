@@ -143,7 +143,7 @@ def node():
 	node_data = calculate_node_data(node_data)
 
 	table_name = f"Result for {adnl}"
-	user_table_columns = session.get("user_table_columns", default_table_columns)
+	user_table_columns = session.get("user_table_columns", default_table_columns).copy()
 	for item in ["ctrl", "notes"]:
 		if item in user_table_columns:
 			user_table_columns.remove(item)
