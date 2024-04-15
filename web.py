@@ -8,6 +8,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import Base, Data, Validator
 
+from mytonlib.adnl import AdnlUdpClient
+
 
 
 settings = dict()
@@ -52,6 +54,26 @@ def favicon():
 def index():
 	user_key = session.get("user_key")
 	return render_template("index.html", user_key=user_key, redirect_url=request.path)
+#end define
+
+@app.route("/adnl_check", methods=["POST"])
+def adnl_check():
+	host = request.json.get("host")
+	port = request.json.get("port")
+	pubkey = request.json.get("pubkey")
+	try: 
+		adnl = AdnlUdpClient()
+		adnl.connect(host, int(port), pubkey)
+		result = {'ok': True, 'message': ''}
+	except Exception as ex:
+		result = {'ok': False, 'message': f'host: {host}, port: {port}, pubkey: {pubkey}, error: {ex}'}
+	return json.dumps(result, indent=4)
+#end define
+
+@app.route('/check_adnl')
+def check_adnl():
+	user_key = session.get("user_key")
+	return render_template("check_adnl.html")
 #end define
 
 @app.route("/login", methods=["POST"])
