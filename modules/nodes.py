@@ -1,6 +1,6 @@
 import datetime as DateTimeLibrary
 from modules.utils import Dict, is_hash, get_hash_type, get_short_git_hash, get_short_hash, timeago, get_avg_from_json, get_max_from_json, bytes_to_base64, base64_to_bytes, row2dict
-from web import is_user_access, is_admin, if_request_arg_true
+from modules.is_s import is_user_access, is_admin, if_request_arg_true
 from models import Data, Validator
 
 def get_nodes_data(db_session):

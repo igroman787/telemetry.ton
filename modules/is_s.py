@@ -9,7 +9,7 @@ def is_user_access(node_key=None):
 	return False
 #end define
 
-def is_admin(user_key):
+def is_admin(local_settings, user_key):
 	admin_keys = local_settings.get("admin_keys")
 	if user_key in admin_keys:
 		return True

@@ -1,3 +1,4 @@
+import time
 import json
 import base64
 import datetime as DateTimeLibrary
@@ -161,5 +162,14 @@ def row2dict(row):
 	else:
 		result = Dict()
 		result.update(row._mapping)
+	return result
+#end define
+
+def get_working_time(func, *args, **kwargs):
+	start = time.time()
+	result = func(*args, **kwargs)
+	diff = time.time() - start
+	if diff > 1:
+		print(f"{func.__name__} take: {diff} seconds")
 	return result
 #end define

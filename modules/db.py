@@ -11,7 +11,7 @@ def create_db_connect(local_settings):
 	host = mysql.get("host")
 	db = mysql.get("db")
 	mysqlConnectUrl = f"mysql://{user}:{passwd}@{host}/{db}"
-	connect_args = {"connect_timeout": 10}
+	connect_args = {"connect_timeout": 3}
 	db_engine = create_engine(mysqlConnectUrl, echo=False, connect_args=connect_args)
 	db_session_function = sessionmaker(bind=db_engine)
 	db_session = db_session_function()

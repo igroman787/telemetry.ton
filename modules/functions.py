@@ -92,6 +92,9 @@ def create_html_chart(title, nodes_data, max=None):
 		dataset["label"] = short_adnl
 		chart_data = list()
 		for data in node_data:
+			if data.unixtime is None:
+				print(f"create_html_chart warning, no unixtime: {data}")
+				continue
 			time_m = data.unixtime * 1000
 			chart_data.append([time_m, data.get(title)])
 		#end for

@@ -7,7 +7,7 @@ from werkzeug.exceptions import HTTPException
 
 
 from models import Base, Data, Validator
-from modules.utils import Dict, is_hash, get_hash_type, get_short_git_hash, get_short_hash, timeago, get_avg_from_json, get_max_from_json, bytes_to_base64, base64_to_bytes, row2dict
+from modules.utils import Dict, is_hash, get_hash_type, get_short_git_hash, get_short_hash, timeago, get_avg_from_json, get_max_from_json, bytes_to_base64, base64_to_bytes, row2dict, get_working_time
 from modules.nodes import get_nodes_data, get_node_data, calculate_node_data, create_empty_node_data, get_node_data_from_db, get_validators_data
 from modules.db import create_db_connect, close_db_connect, get_adnls_list, get_last_election_id, get_validators_list
 from modules.settings import read_settings, write_settings
@@ -58,7 +58,7 @@ def logoute():
 @app.route("/new_admin", methods=["POST"])
 def new_admin():
 	user_key = session.get("user_key")
-	if is_admin(user_key) == False:
+	if is_admin(local_settings, user_key) == False:
 		abort(401)
 	#end if
 	
@@ -77,7 +77,7 @@ def new_admin():
 @app.route("/admin")
 def admin():
 	user_key = session.get("user_key")
-	if is_admin(user_key) == False:
+	if is_admin(local_settings, user_key) == False:
 		abort(401)
 	#end if
 	
@@ -192,12 +192,18 @@ def deserialization():
 	
 	nodes_data = list()
 	db_engine, db_session = create_db_connect(local_settings)
-	validators_list = get_validators_list(db_session, network_name)
-	nodes_data = get_nodes_deser_data(db_session, network_name, limit)
-	nodes_data = calculate_node_deser_data(nodes_data)
-	validators_data = sort_nodes_data(nodes_data, validators_list)
+	#validators_list = get_validators_list(db_session, network_name)
+	#nodes_data = get_nodes_deser_data(db_session, network_name, limit)
+	#nodes_data = calculate_node_deser_data(nodes_data)
+	#validators_data = sort_nodes_data(nodes_data, validators_list)
+	validators_list = get_working_time(get_validators_list, db_session, network_name)
+	nodes_data = get_working_time(get_nodes_deser_data, db_session, network_name, limit)
+	nodes_data = get_working_time(calculate_node_deser_data, nodes_data)
+	validators_data = get_working_time(sort_nodes_data, nodes_data, validators_list)
+	close_db_connect(db_engine, db_session)
 
-	out_of_ser_chart = create_html_chart("out_of_ser", validators_data)
+	out_of_ser_chart = create_html_chart("out_of_ser", validators_data, 10**5)
+	print(f"print deserialization chart - done")
 	return render_template("charts.html", charts=[out_of_ser_chart])
 #end define
 
@@ -302,14 +308,14 @@ def handle_exception(error):
 
 def is_user_access(node_key=None):
 	user_key = session.get("user_key")
-	if is_admin(user_key):
+	if is_admin(local_settings, user_key):
 		return True
 	if node_key != None and user_key == node_key:
 		return True
 	return False
 #end define
 
-def is_admin(user_key):
+def is_admin(local_settings, user_key):
 	admin_keys = local_settings.get("admin_keys")
 	if user_key in admin_keys:
 		return True

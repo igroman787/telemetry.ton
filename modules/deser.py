@@ -27,7 +27,6 @@ def calculate_node_deser_data(nodes_data):
 #end define
 
 def sort_nodes_data(nodes_data, nodes_list):
-	print("sort_nodes_data:", len(nodes_data), len(nodes_list))
 	buff_data = Dict()
 	result = list()
 	for data in nodes_data:
