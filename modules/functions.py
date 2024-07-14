@@ -1,7 +1,8 @@
 import os
-from flask import Flask, url_for, render_template, session, request, redirect, abort, Markup, send_from_directory
+from flask import Flask, url_for, render_template, session, request, redirect, abort, send_from_directory
 from modules.utils import Dict, is_hash, get_hash_type, get_short_git_hash, get_short_hash, timeago, get_avg_from_json, get_max_from_json, bytes_to_base64, base64_to_bytes, row2dict
 from modules.nodes import get_nodes_data, get_node_data, calculate_node_data, create_empty_node_data, get_node_data_from_db, get_validators_data
+from markupsafe import Markup
 
 def set_favorites_list(favorites_list):
 	session["favorites_list"] = favorites_list
@@ -174,7 +175,7 @@ def create_table_lines_for_node(table_columns, input_data):
 	return table_lines
 #end define
 
-def create_table_lines(db_session, table_columns, input_data):
+def create_table_lines(local_settings, db_session, table_columns, input_data):
 	table_lines = list()
 	table_header = list()
 	for column in table_columns:
@@ -184,7 +185,7 @@ def create_table_lines(db_session, table_columns, input_data):
 	nodes_data = get_nodes_data(db_session)
 	for data in input_data:
 		table_line = list()
-		node_data = get_node_data(db_session, nodes_data, data.adnl_address)
+		node_data = get_node_data(local_settings, db_session, nodes_data, data.adnl_address)
 		node_data = calculate_node_data(node_data)
 		for column in table_columns:
 			if column == "ctrl":

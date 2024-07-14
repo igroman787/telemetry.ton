@@ -1,5 +1,6 @@
 import datetime as DateTimeLibrary
 from modules.utils import Dict, is_hash, get_hash_type, get_short_git_hash, get_short_hash, timeago, get_avg_from_json, get_max_from_json, bytes_to_base64, base64_to_bytes, row2dict
+from modules.db import create_db_connect, close_db_connect, get_adnls_list, get_last_election_id, get_validators_list
 from modules.is_s import is_user_access, is_admin, if_request_arg_true
 from models import Data, Validator
 
@@ -38,9 +39,9 @@ def get_nodes_data(db_session):
 	return row2dict(nodes_data)
 #end define
 
-def get_node_data(db_session, data, search_adnl_address, ignore_user_access=False):
+def get_node_data(local_settings, db_session, data, search_adnl_address, ignore_user_access=False):
 	empty_node_data = create_empty_node_data()
-	if ignore_user_access == False and is_user_access() == False:
+	if ignore_user_access == False and is_user_access(local_settings) == False:
 		return empty_node_data
 	for node_data in data:
 		if node_data.adnl_address == search_adnl_address:

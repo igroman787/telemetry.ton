@@ -37,9 +37,9 @@ def init():
 	global local_settings
 	read_settings()
 
-	if "secret_key_b64" not in local_settings:
-			secret_key = os.urandom(256)
-			local_settings["secret_key_b64"] = bytes_to_base64(secret_key)
+	#if "secret_key_b64" not in local_settings:
+	#		secret_key = os.urandom(256)
+	#		local_settings["secret_key_b64"] = bytes_to_base64(secret_key)
 	if "admin_keys" not in local_settings:
 			admin_keys = list()
 			new_admin_key = bytes_to_base64(os.urandom(512))
@@ -55,9 +55,9 @@ def init():
 			local_settings["mysql"] = mysql
 	write_settings()
 
-	secret_key_b64 = local_settings.get("secret_key_b64")
-	app.secret_key = base64_to_bytes(secret_key_b64)
-	serve(app, host='0.0.0.0', port=8000)
+	#secret_key_b64 = local_settings.get("secret_key_b64")
+	#app.secret_key = base64_to_bytes(secret_key_b64)
+	serve(app, host='127.0.0.1', port=8000)
 #end define
 
 init()

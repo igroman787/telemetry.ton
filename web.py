@@ -2,7 +2,7 @@ import os
 import json
 import base64
 import datetime as DateTimeLibrary
-from flask import Flask, url_for, render_template, session, request, redirect, abort, Markup, send_from_directory
+from flask import Flask, url_for, render_template, request, redirect, abort, send_from_directory, make_response #session
 from werkzeug.exceptions import HTTPException
 
 
@@ -10,7 +10,6 @@ from models import Base, Data, Validator
 from modules.utils import Dict, is_hash, get_hash_type, get_short_git_hash, get_short_hash, timeago, get_avg_from_json, get_max_from_json, bytes_to_base64, base64_to_bytes, row2dict, get_working_time
 from modules.nodes import get_nodes_data, get_node_data, calculate_node_data, create_empty_node_data, get_node_data_from_db, get_validators_data
 from modules.db import create_db_connect, close_db_connect, get_adnls_list, get_last_election_id, get_validators_list
-from modules.settings import read_settings, write_settings
 from modules.functions import set_favorites_list, get_favorites_list, create_star_button, get_note, get_warning, create_html_ctrl, create_html_chart, create_table_lines_for_node, create_table_lines
 from modules.deser import get_nodes_deser_data, calculate_node_deser_data, sort_nodes_data
 from modules.is_s import is_user_access, is_admin, if_request_arg_true
@@ -24,35 +23,49 @@ default_table_columns = [ "ctrl", "notes", "adnl_address", "datetime", "remote_c
 all_table_columns = default_table_columns + ["pps", "disks_load_avg", "disks_load_avg_percent", "iops_avg", "disks_load_max", "disks_load_max_percent", "iops_max", "swap_total", "swap_usage", "validator_efficiency", "validator_wallet_address"]
 
 
-@app.before_request
-def make_session_permanent():
-    session.permanent = True
-    app.permanent_session_lifetime = DateTimeLibrary.timedelta(days=730)
+#@app.before_request
+#def make_session_permanent():
+#    session.permanent = True
+#    app.permanent_session_lifetime = DateTimeLibrary.timedelta(days=730)
 #end define
 
 @app.route('/favicon.ico')
 def favicon():
-	return send_from_directory(os.path.join(app.root_path, "static"), "favicon.ico", mimetype="image/vnd.microsoft.icon")
+	static_dir = os.path.join(app.root_path, "static")
+	return send_from_directory(static_dir, "favicon.ico", mimetype="image/vnd.microsoft.icon")
 #end define
 
 @app.route('/')
 def index():
-	user_key = session.get("user_key")
-	return render_template("index.html", user_key=user_key, redirect_url=request.path)
+	#user_key = session.get("user_key")
+	user_key = request.cookies.get("user_key")
+	print(f"index -> user_key: {user_key}, cookies: {request.cookies}")
+	rend = render_template("index.html", user_key=user_key, redirect_url=request.path)
+	resp = make_response(rend)
+	return resp
 #end define
 
 @app.route("/login", methods=["POST"])
 def login():
-	session["user_key"] = request.form.get("user_key")
+	user_key = request.form.get("user_key")
 	redirect_url = request.form.get("redirect_url")
-	return redirect(redirect_url)
+	print(f"login -> user_key: {user_key}, redirect_url: {redirect_url}, cookies: {request.cookies}")
+	#session["user_key"] = user_key
+	rend = redirect(redirect_url)
+	resp = make_response(rend)
+	resp.set_cookie("user_key", user_key)
+	return resp
 #end define
 
 @app.route("/logoute", methods=["POST"])
 def logoute():
-	session["user_key"] = None
+	#session["user_key"] = None
 	redirect_url = request.form.get("redirect_url")
-	return redirect(redirect_url)
+	print(f"logoute -> redirect_url: {redirect_url}, cookies: {request.cookies}")
+	rend = redirect(redirect_url)
+	resp = make_response(rend)
+	resp.set_cookie("user_key", "", expires=0)
+	return resp
 #end define
 
 @app.route("/new_admin", methods=["POST"])
@@ -110,7 +123,7 @@ def nodes():
 
 	table_name = f"Result {len(adnls_data)} nodes"
 	user_table_columns = session.get("user_table_columns", default_table_columns)
-	table_lines = create_table_lines(db_session, user_table_columns, adnls_data)
+	table_lines = create_table_lines(local_settings, db_session, user_table_columns, adnls_data)
 	
 	close_db_connect(db_engine, db_session)
 	return render_template("nodes.html", title_text="Nodes list", table_name=table_name, table_lines=table_lines)
@@ -120,7 +133,7 @@ def nodes():
 def node():
 	adnl = request.args.get("adnl", type=str)
 	limit = request.args.get("limit", type=int, default=1000)
-	if is_user_access() == False:
+	if is_user_access(local_settings) == False:
 		abort(401)
 	#end if
 	
@@ -144,7 +157,7 @@ def node():
 def charts():
 	adnls = request.args.get("adnls", type=str)
 	limit = request.args.get("limit", type=int, default=1000)
-	if is_user_access() == False:
+	if is_user_access(local_settings) == False:
 		abort(401)
 	#end if
 	
@@ -218,7 +231,7 @@ def validators():
 	table_name = f"Result {len(validators_data)} validators, start_work_time={validators_data[0].start_work_time}, end_work_time={validators_data[0].end_work_time}, network_name={validators_data[0].network_name}"
 	user_table_columns = session.get("user_table_columns", default_table_columns)
 	table_columns = user_table_columns + ["weight"]
-	table_lines = create_table_lines(db_session, table_columns, validators_data)
+	table_lines = create_table_lines(local_settings, db_session, table_columns, validators_data)
 	
 	close_db_connect(db_engine, db_session)
 	return render_template("nodes.html", title_text="Validators list", table_name=table_name, table_lines=table_lines)
@@ -231,7 +244,7 @@ def favorites():
 	
 	table_name = f"Result {len(favorites_list)} favorites"
 	user_table_columns = session.get("user_table_columns", default_table_columns)
-	table_lines = create_table_lines(db_session, user_table_columns, favorites_list)
+	table_lines = create_table_lines(local_settings, db_session, user_table_columns, favorites_list)
 	
 	close_db_connect(db_engine, db_session)
 	return render_template("nodes.html", title_text="Favorites list", table_name=table_name, table_lines=table_lines)
@@ -280,7 +293,7 @@ def warnings():
 	table_header = ["ctrl", "notes", "adnl_address", "validator_pubkey", "network_name", "warning_text"]
 	table_lines.append(table_header)
 	for data in adnls_data:
-		node_data = get_node_data(db_session, nodes_data, data.adnl_address, ignore_user_access=True)
+		node_data = get_node_data(local_settings, db_session, nodes_data, data.adnl_address, ignore_user_access=True)
 		node_data = calculate_node_data(node_data)
 		if network_name != None and network_name != node_data.network_name:
 			continue
@@ -306,34 +319,33 @@ def handle_exception(error):
 	return render_template("error_page.html", title_text=title_text, error_code=error.code, error_name=error.name, error_description=error.description), error.code
 #end define
 
-def is_user_access(node_key=None):
-	user_key = session.get("user_key")
-	if is_admin(local_settings, user_key):
-		return True
-	if node_key != None and user_key == node_key:
-		return True
-	return False
+
+
+def read_settings():
+	global local_settings
+	if not os.path.isfile(settings_filepath):
+		return
+	file = open(settings_filepath)
+	data = file.read()
+	file.close()
+	local_settings.update(json.loads(data))
 #end define
 
-def is_admin(local_settings, user_key):
-	admin_keys = local_settings.get("admin_keys")
-	if user_key in admin_keys:
-		return True
-	return False
+def write_settings():
+	global local_settings
+	file = open(settings_filepath, 'w')
+	data = json.dumps(local_settings, indent=4)
+	file.write(data)
+	file.close()
 #end define
-
-def if_request_arg_true(s):
-	return s.lower() == "true"
-#end define
-
 
 def init():
 	global local_settings
 	read_settings()
 	
-	if "secret_key_b64" not in local_settings:
-		secret_key = os.urandom(256)
-		local_settings["secret_key_b64"] = bytes_to_base64(secret_key)
+	#if "secret_key_b64" not in local_settings:
+	#	secret_key = os.urandom(256)
+	#	local_settings["secret_key_b64"] = bytes_to_base64(secret_key)
 	if "admin_keys" not in local_settings:
 		admin_keys = list()
 		new_admin_key = bytes_to_base64(os.urandom(512))
@@ -349,11 +361,11 @@ def init():
 		local_settings["mysql"] = mysql
 	write_settings()
 	
-	secret_key_b64 = local_settings.get("secret_key_b64")
-	app.secret_key = base64_to_bytes(secret_key_b64)
+	#secret_key_b64 = local_settings.get("secret_key_b64")
+	#app.secret_key = base64_to_bytes(secret_key_b64)
 	
 	app.logger.info("start web server")
-	app.run(host="127.0.0.1", port=8000)
+	app.run(host="0.0.0.0", port=8000, debug=True)
 #end define
 
 if __name__ == "__main__":
